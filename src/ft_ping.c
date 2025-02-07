@@ -1,5 +1,8 @@
 #include "ft_ping.h"
 
-int main(void) {
-    printf("Hello world\n");
+void ft_ping(char *ip) {
+    (void)ip;
+    while (1) {
+
+    }
 }
