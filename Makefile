@@ -1,5 +1,5 @@
 #Compiler targets and libraries
-CC			=	c++
+CC			=	cc
 CFLAGS		=	-Wall -Wextra -Werror -Wpedantic
 CFLAGS		+=	-I$(patsubst %/,%,$(patsubst ./%,%,$(SRCS_DIR)))
 NAME		=	ft_ping
