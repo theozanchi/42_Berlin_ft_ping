@@ -10,11 +10,14 @@ void handle_sigint(int sig) {
 }
 
 int main(void) {
-    int sockfd;
+    int     sockfd;
+    t_host  host;
+
     signal(SIGINT, handle_sigint);
 
     if ((sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
-        printf("Error creating the socket\n");
+        perror("Error creating the raw socket");
+        return (EXIT_FAILURE);
     }
-    ft_ping("");
+    ft_ping(sockfd, &host);
 }

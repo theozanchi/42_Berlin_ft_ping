@@ -62,10 +62,10 @@ re:				fclean
 				@make --no-print-directory all
 
 go:				all
-				@./${NAME} ${CONFIG_FILE}
+				@sudo ./${NAME}
 
 vgo:			all
-				valgrind -s --leak-check=full ./${NAME}
+				sudo valgrind -s --leak-check=full ./${NAME}
 
 asan:			fclean
 				$(eval CFLAGS += -fsanitize=address)
