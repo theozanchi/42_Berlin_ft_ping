@@ -23,6 +23,7 @@
 typedef struct s_host {
     char            *host;
     in_addr_t       ip;
+    int             msg_count;
     struct timespec first_sent;
     struct timespec sent;
     struct timespec received;
@@ -37,9 +38,18 @@ typedef struct s_ping_packet {
 } t_ping_pckt;
 
 // ft_ping.c
+void fill_packet(t_ping_pckt *pckt, t_host *host);
+void send_packet(t_ping_pckt *pckt, int sockfd, t_host *host, bool *pckt_sent);
+void recv_packet(int sockfd, t_host *host, bool *pckt_sent);
 void ft_ping(int sockfd, t_host *host);
 
 // main.c
 void handle_sigint(int sig);
+
+// resolve_host.c
+
+
+// utils.c
+unsigned short checksum(void *b, int len);
 
 #endif

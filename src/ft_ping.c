@@ -2,22 +2,7 @@
 
 extern bool sigint;
 
-unsigned short checksum(void *b, int len) {
-    unsigned short *buf = b;
-    unsigned int sum = 0;
-    unsigned short result;
-
-    for (sum = 0; len > 1; len -= 2)
-        sum += *buf++;
-    if (len == 1)
-        sum += *(unsigned char *)buf;
-    sum = (sum >> 16) + (sum & 0xFFFF);
-    sum += (sum >> 16);
-    result = ~sum;
-    return result;
-}
-
-void fill_packet(t_ping_pckt *pckt, int *msg_count) {
+void fill_packet(t_ping_pckt *pckt, t_host *host) {
     long unsigned int i;
 
     bzero(pckt, sizeof(*pckt));
@@ -29,7 +14,7 @@ void fill_packet(t_ping_pckt *pckt, int *msg_count) {
     }
     pckt->msg[i] = 0;
 
-    pckt->hdr.un.echo.sequence = (*msg_count)++;
+    pckt->hdr.un.echo.sequence = host->msg_count++;
     pckt->hdr.checksum = checksum(&pckt, sizeof(pckt));
 }
 
@@ -46,19 +31,21 @@ void send_packet(t_ping_pckt *pckt, int sockfd, t_host *host, bool *pckt_sent) {
     }
 }
 
-void recv_packet(int sockfd, t_host *host, bool *pckt_sent, int *msg_count) {
+void recv_packet(int sockfd, t_host *host, bool *pckt_sent) {
     char                rbuffer[RECV_BUFFER_SIZE];
     struct sockaddr_in  r_addr;
+    socklen_t           addr_len = sizeof(r_addr);
 
-    if (recvfrom(sockfd, rbuffer, sizeof(rbuffer), 0, (struct sockaddr_in *)&r_addr, sizeof(r_addr)) <= 0 && *msg_count > 1) {
+    if (recvfrom(sockfd, rbuffer, sizeof(rbuffer), 0, (struct sockaddr *)&r_addr, &addr_len) <= 0 && host->msg_count > 1) {
         perror("Error while receiving packet");
     } else {
         clock_gettime(CLOCK_MONOTONIC, &(host->received));
+        host->msg_count++;
     }
+    (void)pckt_sent;
 }
 
 void ft_ping(int sockfd, t_host *host) {
-    int             msg_count = 0;
     int             ttl_val = 64;
     struct timeval  recv_timeout;
                     recv_timeout.tv_sec = RECV_TIMEOUT;
@@ -76,10 +63,9 @@ void ft_ping(int sockfd, t_host *host) {
     }
     while (!sigint) {
         pckt_sent = false;
-        fill_packet(&pckt, &msg_count);
+        fill_packet(&pckt, host);
         usleep(PING_SLEEP_RATE);
         send_packet(&pckt, sockfd, host, &pckt_sent);
-        printf("Timestamp: %li.%li\n", host->sent.tv_sec, host->sent.tv_nsec);
-        recv_packet(sockfd, host, &pckt_sent, &msg_count);
+        recv_packet(sockfd, host, &pckt_sent);
     }
 }
