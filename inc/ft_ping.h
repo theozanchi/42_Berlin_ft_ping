@@ -13,6 +13,8 @@
 #include <strings.h>
 #include <time.h>
 #include <sys/time.h>
+#include <netdb.h>
+#include <sys/types.h>
 
 #define PING_PACKET_SIZE 64
 #define PORT_NUMBER 0
@@ -22,7 +24,7 @@
 
 typedef struct s_host {
     char            *host;
-    in_addr_t       ip;
+    struct addrinfo *results;
     int             msg_count;
     struct timespec first_sent;
     struct timespec sent;
@@ -47,7 +49,7 @@ void ft_ping(int sockfd, t_host *host);
 void handle_sigint(int sig);
 
 // resolve_host.c
-
+void resolve_host(t_host *host);
 
 // utils.c
 unsigned short checksum(void *b, int len);
