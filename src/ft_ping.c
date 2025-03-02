@@ -19,16 +19,19 @@ void fill_packet(t_ping_pckt *pckt, t_host *host) {
 }
 
 void send_packet(t_ping_pckt *pckt, int sockfd, t_host *host, bool *pckt_sent) {
-    struct sockaddr_in  addr;
-                        addr.sin_family = AF_INET;
-                        addr.sin_addr.s_addr = host->ip;
-                        addr.sin_port = 0;
+    static struct addrinfo *curr_addr = NULL;
+
+    if (!curr_addr) {
+        curr_addr = host->results;
+    }
 
     clock_gettime(CLOCK_MONOTONIC, &(host->sent));
-    if (sendto(sockfd, &pckt, sizeof(pckt), 0, (struct sockaddr*)&addr, sizeof(addr)) <= 0) {
+    if (sendto(sockfd, &pckt, sizeof(pckt), 0, curr_addr->ai_addr, curr_addr->ai_addrlen) <= 0) {
         perror("Error while sending packet");
-        *pckt_sent = true;
+        curr_addr = curr_addr->ai_next;
     }
+    printf("Pckt sent\n");
+    *pckt_sent = true;
 }
 
 void recv_packet(int sockfd, t_host *host, bool *pckt_sent) {
@@ -40,6 +43,7 @@ void recv_packet(int sockfd, t_host *host, bool *pckt_sent) {
         perror("Error while receiving packet");
     } else {
         clock_gettime(CLOCK_MONOTONIC, &(host->received));
+        printf("Pckt received\n");
         host->msg_count++;
     }
     (void)pckt_sent;
@@ -61,6 +65,7 @@ void ft_ping(int sockfd, t_host *host) {
         perror("Error setting receive timeout value");
         return;
     }
+    resolve_host(host);
     while (!sigint) {
         pckt_sent = false;
         fill_packet(&pckt, host);

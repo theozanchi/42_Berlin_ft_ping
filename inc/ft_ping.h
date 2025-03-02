@@ -15,6 +15,7 @@
 #include <sys/time.h>
 #include <netdb.h>
 #include <sys/types.h>
+#include <arpa/inet.h>
 
 #define PING_PACKET_SIZE 64
 #define PORT_NUMBER 0
@@ -47,6 +48,8 @@ void ft_ping(int sockfd, t_host *host);
 
 // main.c
 void handle_sigint(int sig);
+void init_data(char *host_string, t_host **host_struct);
+int main(int argc, char **argv);
 
 // resolve_host.c
 void resolve_host(t_host *host);

@@ -19,7 +19,9 @@ BOLD		=	\033[1m
 TICK		=	✓
 
 SRC			=	ft_ping.c \
-				main.c
+				main.c \
+				resolve_host.c \
+				utils.c
 
 SRCS		=	$(addprefix ${SRCS_DIR}, ${SRC})
 SRC_NR		=	$(words ${SRCS})
